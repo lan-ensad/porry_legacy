@@ -1,0 +1,56 @@
+[
+    {
+        "id": "c110feda63042c19",
+        "type": "ui_switch",
+        "z": "d45aff0facb9ebce",
+        "name": "",
+        "label": "Fan 01",
+        "tooltip": "",
+        "group": "bbcfef2ee77b6aed",
+        "order": 1,
+        "width": "5",
+        "height": "2",
+        "passthru": true,
+        "decouple": "false",
+        "topic": "01",
+        "topicType": "str",
+        "style": "",
+        "onvalue": "trigger-fan-01",
+        "onvalueType": "str",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 860,
+        "y": 580,
+        "wires": [
+            [
+                "e55d78ac4257df30"
+            ]
+        ]
+    },
+    {
+        "id": "bbcfef2ee77b6aed",
+        "type": "ui_group",
+        "name": "Fans",
+        "tab": "cc14a4a399ed2dc6",
+        "order": 3,
+        "disp": true,
+        "width": 5,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "cc14a4a399ed2dc6",
+        "type": "ui_tab",
+        "name": "Porry Legacy",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    }
+]
