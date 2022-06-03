@@ -7,9 +7,9 @@
 
 //----------------------------------
 //        MQTT CONTROLLER
-const char* ssid = "domo";
-const char* password =  "th1Sp4((!";
-const char* mqttServer = "192.168.0.101";
+const char* ssid = "SSID";
+const char* password =  "PASSWORD";
+const char* mqttServer = "RASPBERRY_IP";
 const int mqttPort = 1883;
 String msg;
 
