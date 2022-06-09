@@ -98,8 +98,8 @@ sudo systemctl enable mosquitto.service
 
 **Configuration**
 
-`sudo nano /etc/mosquitto/mosquitto.conf`
-`listener 1883`
+`sudo nano /etc/mosquitto/mosquitto.conf`<br/>
+`listener 1883`<br/>
 `allow_anonymous true`
 
 ### FireBettle - ESP32
