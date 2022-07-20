@@ -12,7 +12,8 @@ const char* password =  "PASSWORD";
 const char* mqttServer = "RASPBERRY_IP";
 const int mqttPort = 1883;
 String msg;
-
+//----------------------------------
+//        OUTPUT PIN
 const int FAN01 = 26;
 const int FAN02 = 25;
 const int FAN03 = 27;
@@ -22,6 +23,27 @@ bool fan01, fan02 = false;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+//----------------------------------
+//         WIFI RECONNECT
+void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info){
+  Serial.println("Connected to AP successfully!");
+}
+
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info){
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info){
+  Serial.println("Disconnected from WiFi access point");
+  Serial.print("WiFi lost connection. Reason: ");
+  Serial.println(info.disconnected.reason);
+  Serial.println("Trying to Reconnect");
+  WiFi.begin(ssid, password);
+}
+//----------------------------------
+//            CALLBACK
 void callback(char* topic, byte* payload, unsigned int length) {
   String top = topic;
   Serial.print("Message arrived in topic: ");
@@ -57,8 +79,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void setup() {
   pinMode(FAN01, OUTPUT);pinMode(FAN02, OUTPUT);pinMode(FAN03, OUTPUT);pinMode(FAN04, OUTPUT);pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(FAN01, LOW);digitalWrite(FAN02, LOW);digitalWrite(FAN03, LOW);digitalWrite(FAN04, LOW);
-  
+
   Serial.begin(115200);
+  
+  WiFi.disconnect(true);
+  delay(1000);
+  WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
+  WiFi.onEvent(WiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
+  WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
+  
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
