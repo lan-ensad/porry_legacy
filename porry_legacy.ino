@@ -7,9 +7,9 @@
 
 //----------------------------------
 //        MQTT CONTROLLER
-const char* ssid = "SSID";
-const char* password =  "PASSWORD";
-const char* mqttServer = "RASPBERRY_IP";
+const char* ssid = "WIFI-SSID";
+const char* password =  "WIFI-PASSWORD";
+const char* mqttServer = "RASPBERRY-IP";
 const int mqttPort = 1883;
 String msg;
 //----------------------------------
@@ -24,23 +24,41 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 //----------------------------------
-//         WIFI RECONNECT
-void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info){
-  Serial.println("Connected to AP successfully!");
-}
-
-void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info){
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info){
-  Serial.println("Disconnected from WiFi access point");
-  Serial.print("WiFi lost connection. Reason: ");
-  Serial.println(info.disconnected.reason);
-  Serial.println("Trying to Reconnect");
+//     WIFI CONNECT / RECONNECT
+void setup_wifi() {
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
   WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("WiFi connected - ESP IP address: ");
+  Serial.println(WiFi.localIP());
+  client.subscribe("fans/01");
+  client.subscribe("fans/02");
+}
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (client.connect("ESPfans")) {
+      Serial.println("connected");
+      client.subscribe("fans/01");
+      client.subscribe("fans/02");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
 }
 //----------------------------------
 //            CALLBACK
@@ -53,7 +71,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   //=== FAN 01 ===
   if (top == "fans/01") {
     fan01 = !fan01;
-    if(fan01){digitalWrite(FAN01, HIGH);}else{digitalWrite(FAN01, LOW);}
+    if (fan01) {
+      digitalWrite(FAN01, HIGH);
+    } else {
+      digitalWrite(FAN01, LOW);
+    }
     msg = "";
     for (int i = 0; i < length; i++) {
       msg += (char)payload[i];
@@ -64,7 +86,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   //=== FAN 02 ===
   else if (top == "fans/02") {
     fan02 = !fan02;
-    if(fan01){digitalWrite(FAN02, HIGH);}else{digitalWrite(FAN02, LOW);}
+    if (fan01) {
+      digitalWrite(FAN02, HIGH);
+    } else {
+      digitalWrite(FAN02, LOW);
+    }
     msg = "";
     for (int i = 0; i < length; i++) {
       msg += (char)payload[i];
@@ -77,47 +103,29 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void setup() {
-  pinMode(FAN01, OUTPUT);pinMode(FAN02, OUTPUT);pinMode(FAN03, OUTPUT);pinMode(FAN04, OUTPUT);pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(FAN01, LOW);digitalWrite(FAN02, LOW);digitalWrite(FAN03, LOW);digitalWrite(FAN04, LOW);
+  pinMode(FAN01, OUTPUT); pinMode(FAN02, OUTPUT); pinMode(FAN03, OUTPUT); pinMode(FAN04, OUTPUT); pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(FAN01, LOW); digitalWrite(FAN02, LOW); digitalWrite(FAN03, LOW); digitalWrite(FAN04, LOW);
 
   Serial.begin(115200);
-  
-  WiFi.disconnect(true);
-  delay(1000);
-  WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
-  WiFi.onEvent(WiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
-  WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
-  
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi..");
-  }
-  Serial.println("Connected to the WiFi network");
+
+  setup_wifi();
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
-  while (!client.connected()) {
-    Serial.println("Connecting to MQTT...");
-    if (client.connect("ESP32Client")) {
-      Serial.println("connected");
-    } else {
-
-      Serial.print("failed with state ");
-      Serial.print(client.state());
-      delay(2000);
-    }
-  }
-  client.subscribe("fans/01");
-  client.subscribe("fans/02");
-  for (int i = 0; i < 3; i++) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
-  }
+  
 }
 void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
   client.loop();
-  if(fan01){digitalWrite(FAN01, HIGH);}else{digitalWrite(FAN01, LOW);}
-  if(fan02){digitalWrite(FAN02, HIGH);}else{digitalWrite(FAN02, LOW);}
+  if (fan01) {
+    digitalWrite(FAN01, HIGH);
+  } else {
+    digitalWrite(FAN01, LOW);
+  }
+  if (fan02) {
+    digitalWrite(FAN02, HIGH);
+  } else {
+    digitalWrite(FAN02, LOW);
+  }
 }
