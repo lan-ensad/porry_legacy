@@ -1,23 +1,23 @@
 //https://wiki.dfrobot.com/FireBeetle_ESP32_IOT_Microcontroller(V3.0)__Supports_Wi-Fi_&_Bluetooth__SKU__DFR0478
 
 #include <Arduino.h>
-#include <analogWrite.h>
+// #include <analogWrite.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
 //----------------------------------
 //        MQTT CONTROLLER
-const char* ssid = "WIFI-SSID";
-const char* password =  "WIFI-PASSWORD";
-const char* mqttServer = "RASPBERRY-IP";
+const char* ssid = "WIWSSID";
+const char* password =  "WIFIPASS";
+const char* mqttServer = "BROKERIP";
 const int mqttPort = 1883;
 String msg;
 //----------------------------------
 //        OUTPUT PIN
-const int FAN01 = 26;
-const int FAN02 = 25;
-const int FAN03 = 27;
-const int FAN04 = 9;
+const int FAN01 = D2;
+const int FAN02 = D3;
+const int FAN03 = D4;
+const int FAN04 = D5;
 bool fan01, fan02 = false;
 
 WiFiClient espClient;
